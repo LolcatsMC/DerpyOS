@@ -1,0 +1,23 @@
+shell.run("/sys/lib/core")
+shell.run("/sys/lib/display")
+DerpyOS_Display_Clear()
+DerpyOS_Display_ShowBanner()
+print(" ")
+term.write("Setting hostname to "..DerpyOS_System_GetName())
+DerpyOS_Display_StatusSymbol("OK")
+term.write("Loading config")
+shell.run("/sys/etc/config")
+DerpyOS_Display_StatusSymbol("OK")
+t = DerpyOS_Config_Modules
+for i=1,# t do
+  term.write("Loading module " .. t[i])
+  shell.run("/sys/lib/" .. t[i])
+  DerpyOS_Display_StatusSymbol("OK")
+end
+
+if DerpyOS_Shell_Main == nil then
+  print(":: Shell not loaded, dropping to debug")
+  shell.run("shell")
+else
+  DerpyOS_User_LoginScreen()
+end

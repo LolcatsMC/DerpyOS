@@ -1,0 +1,18 @@
+DerpyOS_Display_Clear()
+print("DerpyOS Install Disk Creator")
+print("This utility will make an install floppy disk with your DerpyOS system folder, including your sysconfig and additional modules. It will not include any user information.")
+print("Type YES to create an install floppy disk.")
+a = io.read()
+if a == "YES" then
+  if fs.exists("/disk") then
+    fs.delete("/disk/sys")
+    fs.delete("/disk/startup")
+    fs.delete("/disk/startup._")
+    fs.copy("/sys", "/disk/sys")
+    fs.copy("/startup", "/disk/startup._")
+    fs.copy("/sys/etc/installer.startup", "/disk/startup")
+    print("Completed. Insert the floppy disk in another terminal and restart it to install DerpyOS.")
+  else
+    print("No disk in drive or no drive present.")
+  end
+end

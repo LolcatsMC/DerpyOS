@@ -1,0 +1,26 @@
+term.clear()
+term.setCursorPos(1,1)
+print("DerpyOS version 003 INSTALL")
+print("Do you wish to install DerpyOS?")
+print("(type \"YES\" to continue)")
+t = io.read()
+if t == "YES" then
+ print("Installing DerpyOS 003...")
+ fs.copy("/disk/sys", "/sys")
+ fs.makeDir("/user")
+ fs.copy("/disk/startup._", "/startup")
+ print("Loading system files...")
+ shell.run("/sys/lib/core")
+ shell.run("/sys/lib/user")
+ print("You will now enter the User Modification Wizard.")
+ print("Please follow the prompts to add a user.")
+ print("Press Enter to continue...")
+ read("")
+ shell.run("/sys/bin/usermod")
+ print("Done! Please reboot the terminal.")
+ print("After you do this, use the 'sysconfig' command to change the computer name.")
+else 
+ print("Please remove the disk and reboot the terminal.")
+end
+while true do term.setCursorPos(1,1); end
+

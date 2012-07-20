@@ -1,0 +1,55 @@
+DerpyOS_Shell_Commands = {}
+DerpyOS_Shell_Commands["shutdown"] = function()
+  DerpyOS_System_Shutdown()
+end
+DerpyOS_Shell_Commands["reboot"] = function()
+  DerpyOS_System_Reboot()
+end
+DerpyOS_Shell_Commands["sysconfig"] = function()
+  shell.run("edit", "/sys/etc/config")
+end
+DerpyOS_Shell_Commands["shell"] = function()
+  shell.run("shell")
+end
+DerpyOS_Shell_Commands["help"] = function()
+  print("Available commands:")
+  print("exit")
+  print("logout")
+  for key,val in pairs(DerpyOS_Shell_Commands) do
+    print(tostring(key))
+  end
+  for key,val in pairs(fs.list("/sys/bin")) do
+    print(val)
+  end
+  print("")
+end
+
+function DerpyOS_Shell_Main()
+  while true do  
+    term.write(DerpyOS_Shell_ReadPS1())
+    line = io.read()
+    if line == "logout" or line == "exit" then
+      break
+    elseif fs.exists("/sys/bin/" .. line) then
+      shell.run("/sys/bin/"..line)
+    else
+      if DerpyOS_Shell_Commands[line] == nil then
+        print("shell: invalid command")
+      else
+        DerpyOS_Shell_Commands[line]()
+      end
+    end
+  end
+end
+
+function DerpyOS_Shell_ReadPS1()
+  prompt = "::u@::l $ "
+  if fs.exists(DerpyOS_User_GetUserProfileDir().."/config/shellPS1") then
+    handle = fs.open(DerpyOS_User_GetUserProfileDir() .. "/config/shellPS1", "r")
+    prompt = handle.readLine()
+    handle.close()
+  end
+  prompt = prompt:gsub("::u", DerpyOS_User_GetUserName())
+  prompt = prompt:gsub("::l", DerpyOS_System_GetName())
+  return prompt
+end

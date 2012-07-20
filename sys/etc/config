@@ -1,0 +1,8 @@
+-- DerpyOS Global Configuration --
+
+-- Name of computer -- 
+DerpyOS_Config_SystemName = "derpydev"
+
+-- Modules to load on bootup --
+DerpyOS_Config_Modules = { "user", "shell" }
+
