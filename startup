@@ -1,0 +1,2 @@
+os.loadAPI("/derpy/derpyCore")
+derpyCore.startup()

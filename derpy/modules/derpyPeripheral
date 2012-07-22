@@ -1,0 +1,67 @@
+sides = {"top", "bottom", "left", "right", "back", "front"}
+peripherals = {
+    top = {},
+    bottom = {},
+    left = {},
+    right = {},
+    back = {},
+    front = {}
+}
+
+function scan()
+    derpyDebug.log("derpyPeripheral: Started scan at " .. derpyDebug.getTime())
+    for key, side in pairs(sides) do
+        if peripheral.isPresent(side) then
+            peripheralFire(side)
+        end
+    end
+    derpyDebug.log("derpyPeripheral: Finished scan at " .. derpyDebug.getTime())
+end
+
+function peripheralFire(side)
+    if peripheral.isPresent(side) then
+        local detectedType = peripheral.getType(side)
+        peripherals[side] = { type = detectedType, api = peripheral.wrap(side) }
+        if detectedType == "monitor" then
+            peripherals[side].api.clear()
+            peripherals[side].api.setCursorPos(1,1)
+            local w, h = peripherals[side].api.getSize()
+            derpyDebug.log("derpyPeripheral: Monitor detected on " .. side .. " side, size " .. w .. "x" .. h .. ".")
+        elseif detectedType == "modem" then
+            derpyDebug.log("derpyPeripheral: Modem detected on " .. side .. " side.")
+            if derpyNetwork ~= nil then
+                derpyDebug.log("derpyPeripheral: Notifying network handler of modem presence")
+                --derpyNetwork.newModem(side)
+            else
+                derpyDebug.log("derpyPeripheral: Network handler not loaded, ignoring modem")
+            end
+        else
+            derpyDebug.log("derpyPeripheral: Peripheral of type " .. detectedType .. " found on " .. side .. " side, no handler for this type.")
+        end
+    else
+        peripherals[side] = {}
+    end
+end
+
+function backgroundTask()
+    derpyDebug.log("derpyPeripheral: Entered background handler")
+    while true do
+        local event, param1, param2, param3 = os.pullEvent()
+        if event == "peripheral" then
+            derpyDebug.log("derpyPeripheral: Event fired on " .. param1 .. " side, scanning side")
+            peripheralFire(param1)
+            derpyDebug.log("derpyPeripheral: Event scan complete.")
+        elseif event == "peripheral_detach" then
+            derpyDebug.log("derpyPeripheral: Remove event fired on " .. param1 .. " side, clearing entry")
+            peripherals[param1] = {}
+        end
+    end
+end
+
+function load()
+    derpyDebug.log("derpyPeripheral: Loaded at " .. derpyDebug.getTime())
+    if derpyCore.getSetting("derpyPeripheral").scanOnLoad then scan(); end
+    derpyCore.registerBackground("derpyPeripheral", backgroundTask)
+end
+
+load()
