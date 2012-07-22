@@ -1,0 +1,73 @@
+local coreVersion = "0.1a"
+local loadedModules = {}
+backgroundTasks = {}
+
+function getVersion()
+    return coreVersion
+end
+
+function statusMessage(code)
+    x, y = term.getCursorPos()
+    w, h = term.getSize()
+    pos = w - 4 - string.len(code)
+    term.setCursorPos(pos, y)
+    term.write("[ " .. code ..  " ]")
+    term.setCursorPos(1, y+1)
+end
+
+function loadModule(name, display)
+    if display then term.write(">> Loading module " .. name); end
+    if fs.exists("/derpy/modules/" .. name) then
+        os.loadAPI("/derpy/modules/" .. name)
+        table.insert(loadedModules, name)
+        if display then statusMessage("OK"); end
+    else
+        if display then statusMessage("EE"); end
+    end
+end
+
+function getSetting(key)
+    os.loadAPI("/derpy/config")
+    local value = config.derpyConfig[key]
+    os.unloadAPI("/derpy/config")
+    return value
+end
+
+function loadModules()
+    print(":: Loading modules")
+    loadModule("derpyDebug", true)
+    loadModule("derpyPeripheral", true)
+    local moduleList = getSetting("modulesToLoad")
+    for key, module in pairs(moduleList) do
+        loadModule(module, true)
+    end
+end
+
+function registerBackground(name, task)
+    table.insert(backgroundTasks, task)
+    derpyDebug.log([[derpyCore: Background task "]] .. name .. [[" registered]])
+end
+
+function userInteraction()
+    print("This is the user interaction thread.")
+    while true do
+        --derpyDebug.dumpLogToMonitor("left")
+        local derp = io.read()
+        print("You said " .. derp)
+    end
+end
+
+function startup()
+    term.clear()
+    term.setCursorPos(1,1)
+    w, h = term.getSize(); w = (w - 28) / 2; space = ""
+    space = string.rep(" ", w)
+    print(space.."  _                 _   __ ")
+    print(space.." | \\  _  ._ ._     / \\ (_  ")
+    print(space.." |_/ (/_ |  |_) \\/ \\_/ __) ")
+    print(space.."            |   /          ")
+    print("DerpyOS version " .. getVersion())
+    print("Created by Programming with Lolcats")
+    loadModules()
+    parallel.waitForAll(userInteraction, unpack(backgroundTasks))
+end

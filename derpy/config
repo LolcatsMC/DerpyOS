@@ -1,0 +1,8 @@
+derpyConfig = {
+    modulesToLoad = {
+        "derpyNetwork"
+    },
+    derpyPeripheral = {
+        scanOnLoad = true
+    }
+}

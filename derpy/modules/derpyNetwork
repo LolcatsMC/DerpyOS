@@ -1,0 +1,50 @@
+local cableSide = ""
+local bNetworkSide = ""
+local bNetworkUp = false
+
+function isNetworkUp()
+    return bNetworkUp
+end
+
+function networkUp(side)
+    if bNetworkUp == true then
+        networkDown()
+    end
+    derpyPeripheral.peripherals[side].api.open()
+    bNetworkSide = side
+    bNetworkUp = true
+    derpyPeripheral.peripherals[side].api.broadcast("derpyNetwork::Open")
+end
+
+function networkDown()
+    derpyPeripheral.peripherals[bNetworkSide].api.close()
+    bNetworkUp = false
+    bNetworkSide = ""
+end
+
+function load()
+    derpyDebug.log("derpyNetwork: Loaded at " .. derpyDebug.getTime())
+    local cableSide = ""
+    local settings = derpyCore.getSetting("derpyNetwork")
+    if settings == nil then cableSide = nil; end
+    if cableSide == nil then
+        derpyDebug.log("derpyNetwork: No cable side defined in config, searching for modem")
+        for key, val in pairs(derpyPeripheral.peripherals) do
+            if val.type == "modem" then
+                derpyDebug.log("derpyNetwork: Found modem on  " .. key .. " side, putting up network")
+                networkUp(key)
+            end
+        end
+    else
+        derpyDebug.log("derpyNetwork: Cable on " .. cableSide .. " side, putting up network")
+        derpyPeripheral.peripherals[cableSide] = { type = "networkCable", api = rednet }
+        networkUp(cableSide)
+    end
+end
+
+function newModem(side)
+    derpyDebug.log("derpyNetwork: Notified of new modem on  " .. side .. " side, putting up network")
+    networkUp(modemSide)
+end
+
+load()

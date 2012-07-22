@@ -1,0 +1,41 @@
+function load()
+    if not fs.exists("/derpy/logs") then 
+        fs.makeDir("/derpy/logs")
+    end
+    if fs.exists("/derpy/logs/syslog.1") then
+        fs.delete("/derpy/logs/syslog.1")
+    end
+    if fs.exists("/derpy/logs/syslog") then
+        fs.move("/derpy/logs/syslog", "/derpy/logs/syslog.1")
+    end
+    log("derpyDebug: Loaded at " .. getTime())
+    log("derpyDebug: Running on DerpyOS " .. derpyCore.getVersion())
+end
+
+function log(message)
+    local handle = fs.open("/derpy/logs/syslog", "a")
+    handle.writeLine(message)
+    handle.close()
+end
+
+function dumpLogToMonitor(side)
+    derpyPeripheral.peripherals[side].api.clear()
+    derpyPeripheral.peripherals[side].api.setCursorPos(1,1)
+    local handle = fs.open("/derpy/logs/syslog", "r")
+    local y = 1
+    local line = ""
+    while line ~= nil do
+        local line = handle.readLine()
+        derpyPeripheral.peripherals[side].api.write(line)
+        y = y + 1
+        derpyPeripheral.peripherals[side].api.setCursorPos(1, y)
+    end
+    handle.close()
+    return true
+end
+
+function getTime()
+    return textutils.formatTime(os.time(), true)
+end
+
+load()
