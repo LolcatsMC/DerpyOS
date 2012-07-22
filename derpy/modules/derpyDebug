@@ -8,12 +8,13 @@ function load()
     if fs.exists("/derpy/logs/syslog") then
         fs.move("/derpy/logs/syslog", "/derpy/logs/syslog.1")
     end
-    log("derpyDebug: Loaded at " .. getTime())
-    log("derpyDebug: Running on DerpyOS " .. derpyCore.getVersion())
+    log("derpyDebug", "Loaded")
+    log("derpyDebug", "Running on DerpyOS " .. derpyCore.getVersion())
 end
 
-function log(message)
+function log(name, message)
     local handle = fs.open("/derpy/logs/syslog", "a")
+    message = "[" .. os.clock() .. "] " .. name .. ": " .. message
     handle.writeLine(message)
     handle.close()
 end
@@ -32,6 +33,27 @@ function dumpLogToMonitor(side)
     end
     handle.close()
     return true
+end
+
+function debugShell()
+    while true do
+        term.write("debug> ")
+        t = io.read()
+        if t == "perfire" then 
+            os.queueEvent("peripheral", "right")
+            print("issued peripheral event for right side")
+        elseif t == "list" then
+            derpyEvent.debugEvents()
+            print("logged list of registered events to syslog")
+        elseif t == "netfire" then
+            os.queueEvent("rednet_message", 1, "derpyNetwork::Open", 2)
+            print("issued network receive open from id 1")
+        elseif t == "break" then
+           break
+        else
+            print("not a debug command")
+        end
+    end
 end
 
 function getTime()

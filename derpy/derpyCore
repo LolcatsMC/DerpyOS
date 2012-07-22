@@ -1,6 +1,5 @@
 local coreVersion = "0.1a"
 local loadedModules = {}
-backgroundTasks = {}
 
 function getVersion()
     return coreVersion
@@ -36,6 +35,8 @@ end
 function loadModules()
     print(":: Loading modules")
     loadModule("derpyDebug", true)
+    loadModule("derpyEvent", true)
+    loadModule("derpyUser", true)
     loadModule("derpyPeripheral", true)
     local moduleList = getSetting("modulesToLoad")
     for key, module in pairs(moduleList) do
@@ -43,25 +44,10 @@ function loadModules()
     end
 end
 
-function registerBackground(name, task)
-    table.insert(backgroundTasks, task)
-    derpyDebug.log([[derpyCore: Background task "]] .. name .. [[" registered]])
-end
-
-function userInteraction()
-    print("This is the user interaction thread.")
-    while true do
-        --derpyDebug.dumpLogToMonitor("left")
-        local derp = io.read()
-        print("You said " .. derp)
-    end
-end
-
 function startup()
     term.clear()
     term.setCursorPos(1,1)
-    w, h = term.getSize(); w = (w - 28) / 2; space = ""
-    space = string.rep(" ", w)
+    w, h = term.getSize(); w = (w - 28) / 2; space = string.rep(" ", w)
     print(space.."  _                 _   __ ")
     print(space.." | \\  _  ._ ._     / \\ (_  ")
     print(space.." |_/ (/_ |  |_) \\/ \\_/ __) ")
@@ -69,5 +55,6 @@ function startup()
     print("DerpyOS version " .. getVersion())
     print("Created by Programming with Lolcats")
     loadModules()
-    parallel.waitForAll(userInteraction, unpack(backgroundTasks))
+    print(":: Starting background tasks")
+    parallel.waitForAll(derpyEvent.backgroundEventHandler, derpyUser.computerForeground)
 end

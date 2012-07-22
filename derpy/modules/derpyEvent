@@ -1,0 +1,45 @@
+backgroundEvent = {
+    char = {},
+    key = {},
+    timer = {},
+    alarm = {},
+    redstone = {},
+    disk = {},
+    disk_eject = {},
+    rednet_message = {},
+    peripheral = {},
+    peripheral_detach = {}
+}
+
+function registerEvent(name, event, task)
+    backgroundEvent[event][name] = task
+    derpyDebug.log("derpyEvent", [[Background handler "]] .. name .. [[" registered for event ]] .. event)
+end
+
+function backgroundEventHandler()
+    derpyDebug.log("derpyEvent", "Background event handler started")
+    while true do 
+        event, p1, p2, p3 = os.pullEvent()
+        derpyDebug.log("derpyEvent", "Event " .. event .. " received.")
+        for name, task in pairs(backgroundEvent[event]) do
+            derpyDebug.log("derpyEvent", "Calling handler \"" .. name .. "\" for event " .. event)
+            task(event, p1, p2, p3)
+        end
+    end
+end
+
+function debugEvents()
+    derpyDebug.log("derpyEvent", "Dumping tree of registered event handlers")
+    for key, val in pairs(derpyEvent.backgroundEvent) do
+        derpyDebug.log("derpyEvent", "|-- " .. key)
+        for key, val in pairs(val) do
+            derpyDebug.log("derpyEvent","    |-- "..key)
+        end
+    end
+end
+
+function load()
+    derpyDebug.log("derpyEvent", "Loaded")
+end
+
+load()

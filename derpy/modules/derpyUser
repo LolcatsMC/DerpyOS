@@ -1,0 +1,19 @@
+function load()
+    derpyDebug.log("derpyUser", "Loaded")
+end
+
+function computerForeground()
+    while true do
+        derpyDebug.debugShell()
+        --loginScreen()
+    end
+end
+
+function loginScreen()
+    write(os.getComputerLabel() .. " login: ")
+    local username = read()
+    write("Password: ")
+    local password = read("*")
+end
+
+load()

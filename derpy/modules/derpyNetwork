@@ -22,29 +22,51 @@ function networkDown()
     bNetworkSide = ""
 end
 
+function newModem(side)
+    derpyDebug.log("derpyNetwork", "Notified of new modem on  " .. side .. " side, putting up network")
+    networkUp(modemSide)
+end
+
+function broadcastPing()
+    derpyDebug.log("derpyNetwork", "Sending broadcast ping")
+    derpyPeripheral.peripherals[bNetworkSide].api.broadcast("derpyNetwork::Ping")
+end
+
+function pingID(id)
+    derpyDebug.log("derpyNetwork", "Pinging ID " .. id)
+    derpyPeripheral.peripherals[bNetworkSide].api.send(id, "derpyNetwork::Ping")
+end
+
+function eventHandler(event, param1, param2, param3)
+    if param2 == "derpyNetwork::Ping" then
+        derpyDebug.log("derpyNetwork", "Received ping from ID " .. param1 .. " distance " .. param3)
+        -- respond to the ping with a pong!
+        derpyPeripheral.peripherals[bNetworkSide].api.send(param1, "derpyNetwork::Pong")
+    elseif param2 == "derpyNetwork::Open" then
+        derpyDebug.log("derpyNetwork", "Received open signal from ID " .. param1 .. " distance " .. param3)
+        pingID(param1)
+    end
+end
+
 function load()
-    derpyDebug.log("derpyNetwork: Loaded at " .. derpyDebug.getTime())
+    derpyDebug.log("derpyNetwork", "Loaded")
     local cableSide = ""
     local settings = derpyCore.getSetting("derpyNetwork")
     if settings == nil then cableSide = nil; end
     if cableSide == nil then
-        derpyDebug.log("derpyNetwork: No cable side defined in config, searching for modem")
+        derpyDebug.log("derpyNetwork", "No cable side defined in config, searching for modem")
         for key, val in pairs(derpyPeripheral.peripherals) do
             if val.type == "modem" then
-                derpyDebug.log("derpyNetwork: Found modem on  " .. key .. " side, putting up network")
+                derpyDebug.log("derpyNetwork", "Found modem on " .. key .. " side, putting up network")
                 networkUp(key)
             end
         end
     else
-        derpyDebug.log("derpyNetwork: Cable on " .. cableSide .. " side, putting up network")
+        derpyDebug.log("derpyNetwork", "Cable on " .. cableSide .. " side, putting up network")
         derpyPeripheral.peripherals[cableSide] = { type = "networkCable", api = rednet }
         networkUp(cableSide)
     end
-end
-
-function newModem(side)
-    derpyDebug.log("derpyNetwork: Notified of new modem on  " .. side .. " side, putting up network")
-    networkUp(modemSide)
+    derpyEvent.registerEvent("derpyNetwork", "rednet_message", eventHandler)
 end
 
 load()
