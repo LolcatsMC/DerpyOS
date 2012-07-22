@@ -1,6 +1,2 @@
-<<<<<<< HEAD
-shell.run("/sys/lib/rc")
-=======
 os.loadAPI("/derpy/derpyCore")
 derpyCore.startup()
->>>>>>> origin/rewrite
