@@ -51,7 +51,7 @@ end
 function userInteraction()
     print("This is the user interaction thread.")
     while true do
-        derpyDebug.dumpLogToMonitor("left")
+        --derpyDebug.dumpLogToMonitor("left")
         local derp = io.read()
         print("You said " .. derp)
     end
