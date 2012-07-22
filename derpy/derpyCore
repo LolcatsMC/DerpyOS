@@ -61,7 +61,7 @@ function startup()
     term.clear()
     term.setCursorPos(1,1)
     w, h = term.getSize(); w = (w - 28) / 2; space = ""
-    while w > 0 do space = space .. " "; w = w - 1; end
+    space = string.rep(" ", w)
     print(space.."  _                 _   __ ")
     print(space.." | \\  _  ._ ._     / \\ (_  ")
     print(space.." |_/ (/_ |  |_) \\/ \\_/ __) ")
